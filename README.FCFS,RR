@@ -1,0 +1,105 @@
+import java.util.Arrays;
+import java.util.Scanner;
+public class CPU_Scheduling 
+{
+    public static void fcfs(int[] processes, int[] burstTimes) 
+    {
+        int n = processes.length;
+        int[] waitingTimes = new int[n];
+        int[] turnaroundTimes = new int[n];
+        for (int i = 1; i < n; i++) 
+        {
+            waitingTimes[i] = waitingTimes[i - 1] + burstTimes[i - 1];
+        }
+        for (int i = 0; i < n; i++)
+        {
+            turnaroundTimes[i] = waitingTimes[i] + burstTimes[i];
+        }
+        double avgWaitingTime = Arrays.stream(waitingTimes).average().orElse(0);
+        double avgTurnaroundTime = Arrays.stream(turnaroundTimes).average().orElse(0);
+        System.out.println("FCFS Scheduling:");
+        System.out.println("Waiting Times: " + Arrays.toString(waitingTimes));
+        System.out.println("Turnaround Times: " + Arrays.toString(turnaroundTimes));
+        System.out.println("Average Waiting Time: " + avgWaitingTime);
+        System.out.println("Average Turnaround Time: " + avgTurnaroundTime);
+    }
+    public static void roundRobin(int[] processes, int[] burstTimes, int quantum)
+    {
+        int n = processes.length;
+        int[] remainingTimes = Arrays.copyOf(burstTimes, n);
+        int[] waitingTimes = new int[n];
+        int[] turnaroundTimes = new int[n];
+        int time = 0;
+        int completed = 0;
+        while (completed < n) {
+            for (int i = 0; i < n; i++)
+            {
+                if (remainingTimes[i] > 0) 
+                {
+                    if (remainingTimes[i] > quantum) 
+                    {
+                        time += quantum;
+                        remainingTimes[i] -= quantum;
+                    }
+                    else 
+                    {
+                        time += remainingTimes[i];
+                        waitingTimes[i] = time - burstTimes[i];
+                        remainingTimes[i] = 0;
+                        completed++;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) 
+        {
+            turnaroundTimes[i] = waitingTimes[i] + burstTimes[i];
+        }
+        double avgWaitingTime = Arrays.stream(waitingTimes).average().orElse(0);
+        double avgTurnaroundTime = Arrays.stream(turnaroundTimes).average().orElse(0);
+        System.out.println("Round Robin Scheduling:");
+        System.out.println("Waiting Times: " + Arrays.toString(waitingTimes));
+        System.out.println("Turnaround Times: " + Arrays.toString(turnaroundTimes));
+        System.out.println("Average Waiting Time: " + avgWaitingTime);
+        System.out.println("Average Turnaround Time: " + avgTurnaroundTime);
+    }
+    public static void main(String[] args)
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of processes: ");
+        int n = scanner.nextInt();
+        int[] processes = new int[n];
+        int[] burstTimes = new int[n];
+        System.out.println("Enter the burst times for each process:");
+        for (int i = 0; i < n; i++) 
+        {
+            System.out.print("Process " + i + " burst time: ");
+            burstTimes[i] = scanner.nextInt();
+        }
+        while (true)
+        {
+            System.out.println("\nCPU Scheduling Algorithms:");
+            System.out.println("1. FCFS Scheduling");
+            System.out.println("2. Round Robin Scheduling");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            switch (choice) 
+            {
+                case 1:
+                    fcfs(processes, burstTimes);
+                    break;
+                case 2:
+                    System.out.print("Enter the quantum time for Round Robin: ");
+                    int quantum = scanner.nextInt();
+                    roundRobin(processes, burstTimes, quantum);
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        }
+    }
+}
