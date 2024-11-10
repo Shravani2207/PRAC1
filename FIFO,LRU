@@ -1,0 +1,89 @@
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Scanner;
+public class PageReplacement {
+    private static void simulateFIFO(int[] pages, int capacity) {
+        int totalPages = pages.length;
+        int index = 0, hits = 0, faults = 0;
+        double hitRatio, faultRatio;
+        int[] frame = new int[capacity];
+        for (int i = 0; i < capacity; i++) {
+            frame[i] = -1;
+        }
+        System.out.println("\nFIFO Page Replacement:");
+        for (int page : pages) {
+            boolean isHit = false;
+            for (int j = 0; j < capacity; j++) {
+                if (frame[j] == page) {
+                    isHit = true; // Page hit
+                    hits++;
+                    break;
+                }
+            }
+            if (!isHit) {
+                frame[index] = page; // Replace page
+                faults++;
+                index = (index + 1) % capacity; // Move index to next frame
+            }
+            System.out.print("Current Frames: [");
+            for (int f : frame) {
+                System.out.print((f == -1) ? " " : f);
+                System.out.print(" ");
+            }
+            System.out.println("]");
+        }
+        faultRatio = ((double) faults / totalPages) * 100;
+        hitRatio = ((double) hits / totalPages) * 100;
+        System.out.println("------------------------------");
+        System.out.println("Number of Page Faults: " + faults);
+        System.out.println("Hits: " + hits);
+        System.out.printf("Hit Ratio: %.2f%%\n", hitRatio);
+        System.out.printf("Fault Ratio: %.2f%%\n", faultRatio);
+    }
+    private static void simulateLRU(int[] pages, int capacity) {
+        int totalPages = pages.length;
+        int pageFaults = 0, hits = 0;
+        Map<Integer, Integer> lruCache = new LinkedHashMap<>(capacity, 0.75f, true);
+        System.out.println("\nLRU Page Replacement:");
+        for (int page : pages) {
+            if (!lruCache.containsKey(page)) {
+                pageFaults++; // Page fault occurred
+                if (lruCache.size() >= capacity) {
+                    int lruPage = lruCache.keySet().iterator().next();
+                    lruCache.remove(lruPage);
+                }
+            } else {
+                hits++; // Page hit
+            }
+            lruCache.put(page, page);
+            System.out.println("Current Frames: " + lruCache.keySet());
+        }
+        double hitRatio = ((double) hits / totalPages) * 100;
+        System.out.println("------------------------------");
+        System.out.println("Number of Page Faults: " + pageFaults);
+        System.out.println("Hits: " + hits);
+        System.out.printf("Hit Ratio: %.2f%%\n", hitRatio);
+    }
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of pages: ");
+        int numPages = scanner.nextInt();
+        int[] pages = new int[numPages];
+        System.out.println("Enter the page references:");
+        for (int i = 0; i < numPages; i++) {
+            pages[i] = scanner.nextInt();
+        }
+        System.out.print("Enter the capacity of frames: ");
+        int capacity = scanner.nextInt();
+        System.out.print("Choose Page Replacement Algorithm (1 for FIFO, 2 for LRU): ");
+        int choice = scanner.nextInt();
+        if (choice == 1) {
+            simulateFIFO(pages, capacity);
+        } else if (choice == 2) {
+            simulateLRU(pages, capacity);
+        } else {
+            System.out.println("Invalid choice. Please choose 1 for FIFO or 2 for LRU.");
+        }
+        scanner.close();
+    }
+}
