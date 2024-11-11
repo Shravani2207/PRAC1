@@ -1,0 +1,211 @@
+import java.util.HashSet;
+import java.util.Scanner;
+public class PageReplacement 
+{
+    private static void simulateFIFO(int[] pages, int capacity) 
+    {
+        int noOfPages = pages.length;
+        int index = 0, hit = 0, fault = 0;
+        double faultRatio, hitRatio;
+        int[] frame = new int[capacity];
+        for (int i = 0; i < capacity; i++) 
+        {
+            frame[i] = -1;
+        }
+        System.out.println("\nFIFO Page Replacement:");
+        for (int page : pages) 
+        {
+            boolean isHit = false;
+            for (int j = 0; j < capacity; j++) 
+            {
+                if (frame[j] == page)
+                {
+                    isHit = true; // Page hit
+                    hit++;
+                    break;
+                }
+            }
+            if (!isHit)
+            {
+                frame[index] = page;
+                fault++;
+                index = (index + 1) % capacity; 
+            }
+            System.out.print(" [");
+            for (int f : frame)
+            {
+                if (f == -1) 
+                {
+                    System.out.print(" ");
+                }
+                else
+                {
+                    System.out.print(f);
+                }
+                System.out.print(" ");
+            }
+            System.out.println("]");
+        }
+        faultRatio = ((double) fault / noOfPages) * 100;
+        hitRatio = ((double) hit / noOfPages) * 100;
+        System.out.println("------------------------------");
+        System.out.println("Number of Page Faults: " + fault);
+        System.out.println("Hits: " + hit);
+        System.out.printf("Hit Ratio: %.2f%%\n", hitRatio);
+        System.out.printf("Fault Ratio: %.2f%%\n", faultRatio);
+    }
+    private static void simulateOptimal(int[] pages, int capacity) // This method simulates the Optimal page replacement algorithm, which tries to replace the page that will not be used for the longest time in the future.
+    {
+        int numPages = pages.length;
+        int pageFaults = 0, hits = 0;
+        HashSet<Integer> frames = new HashSet<>(); // This set helps track which pages are currently in memory.
+        System.out.println("\nOptimal Page Replacement:");
+// Similar to the FIFO method, but here, frames is a HashSet, which is used to store unique pages in memory for efficient lookup.
+        for (int i = 0; i < numPages; i++) 
+        {
+            if (frames.size() < capacity) // If the page is not in memory, a page fault occurs: The page is added to memory, and the fault counter is incremented.
+            {
+                if (!frames.contains(pages[i]))  // If the page is already in memory (i.e., frames.contains(pages[i]) is true), it's a hit.
+                {
+                    pageFaults++; 
+                    frames.add(pages[i]);
+                }
+                else 
+                {
+                    hits++;
+                }
+            } 
+            else
+            {
+                if (!frames.contains(pages[i])) // •  This checks if the page pages[i] is not already in memory (frames).
+•  If it's not in memory, then we need to replace one of the pages in memory with pages[i].
+                { 
+                    int farthestIndex = -1; // -1 to ensure that any page's next use will be further in time than this initial value.
+                    int pageToReplace = -1;// set to -1, and it will be updated as we find the page that is used the farthest in the future.
+                    for (int frame : frames) 
+                    {
+                        int nextUse = nextIndex(pages, i, frame);// The nextUse value tells us when the page frame will be used next
+                        if (nextUse > farthestIndex) 
+                        {
+                            farthestIndex = nextUse;
+                            pageToReplace = frame;// We update farthestIndex to nextUse and set pageToReplace to the current page (frame).
+                        }
+                    }
+                    frames.remove(pageToReplace);	// After determining which page is the farthest away from being used, we remove it from the memory (frames).
+                    frames.add(pages[i]);// We add the new page pages[i] to the memory, as we've decided to replace the farthest-used page.
+                    pageFaults++;
+                }
+                else
+                {
+                    hits++;
+                }
+            }
+            System.out.println("Current Frames: " + frames);
+        }
+        System.out.println("------------------------------");
+        System.out.println("Number of Page Faults: " + pageFaults);
+        System.out.println("Hits: " + hits);
+        System.out.printf("Hit Ratio: %.2f%%\n", ((double) hits / numPages) * 100);
+    }
+    private static int nextIndex(int[] pages, int curIndex, int page)
+//  pages[]: An array representing the sequence of page accesses.
+curIndex: The current index in the pages[] array, representing the position where we are checking.
+    {
+        for (int j = curIndex + 1; j < pages.length; j++) 
+        { 
+            if (pages[j] == page)
+            { 
+                return j; // If the page is found, the method returns the index j
+            }
+        }
+        return Integer.MAX_VALUE; 
+    }
+    public static void main(String[] args)
+    {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter the number of pages you want to enter: ");
+        int noOfPages = sc.nextInt();
+        int[] pages = new int[noOfPages];
+        System.out.println("Enter the pages:");
+        for (int i = 0; i < noOfPages; i++)
+        {
+            pages[i] = sc.nextInt();
+        }
+        System.out.print("Enter the capacity of frames: ");
+        int capacity = sc.nextInt();
+        System.out.print("Choose Page Replacement Algorithm (1 for FIFO, 2 for Optimal): ");
+        int choice = sc.nextInt();
+        if (choice == 1)
+        {
+            simulateFIFO(pages, capacity);
+        } else if (choice == 2)
+        {
+            simulateOptimal(pages, capacity);
+        }
+        else 
+        {
+            System.out.println("Invalid choice. Please choose 1 or 2.");
+        }
+        sc.close();
+    }
+}
+// •  The main method is the entry point of the program.
+•  It prompts the user to input:
+•	The number of pages and their values.
+•	The number of frames (capacity) in memory.
+•	The algorithm choice (FIFO or Optimal).
+•  Depending on the user's choice, it either calls simulateFIFO() or simulateOptimal().
+•  If the user provides an invalid choice, the program prints an error message.
+
+
+
+
+This Java code simulates two page replacement algorithms: FIFO (First-In-First-Out) and Optimal Page Replacement. These algorithms are used to manage the memory (pages) in a computer's virtual memory system.
+________________________________________
+Main Concepts:
+1.	Page Replacement Algorithms:
+o	FIFO: Replaces the oldest page in memory.
+o	Optimal: Replaces the page that won't be used for the longest time in the future.
+2.	Purpose of the Program:
+o	The program simulates how pages are loaded into memory and replaced using one of these algorithms. It tracks how many times a page is already in memory (hit) and how many times the system has to load a new page (fault).
+o	The goal is to compare the hit ratio (how often a page is found in memory) and the fault ratio (how often a new page needs to be loaded into memory).
+________________________________________
+Code Breakdown:
+1.	simulateFIFO() method (FIFO Algorithm):
+o	This method processes each page request and checks if the page is already in memory.
+o	If the page is not found (a page fault), it replaces the oldest page in memory (using a circular buffer).
+o	It tracks the number of hits and faults, then calculates the hit ratio and fault ratio.
+2.	simulateOptimal() method (Optimal Algorithm):
+o	This method keeps track of the pages in memory using a HashSet.
+o	If a page is not found (a page fault), it looks for the page that will be needed last in the future and replaces it.
+o	It tracks hits and faults, and similarly calculates the ratios.
+3.	nextIndex() method:
+o	This helper function is used in the Optimal Algorithm to find out when a page will be used again in the future, so we can replace the one that will be used farthest in the future.
+________________________________________
+How the Program Works:
+1.	The user provides a list of page requests
+2.	The user also enters the number of pages that can be stored in memory at once.
+3.	The user also provides the capacity of memory (how many pages can be stored in memory at once).
+4.	The user chooses which page replacement algorithm to use:
+o	FIFO: Replaces the oldest page.
+o	Optimal: Replaces the page that won't be used for the longest time.
+Counting hits and faults:
+•	Hit: If a page is already in memory when requested.
+•	Fault: If the page is not in memory and needs to be loaded into memory.
+
+5.	For each algorithm:
+o	The program goes through the list of page requests and simulates loading the pages into memory, tracking hits (when the page is already in memory) and faults (when the page needs to be loaded into memory).
+o	After processing all the page requests, the program displays the hit ratio and fault ratio.
+
+Output:
+•	After processing the page requests, the program shows:
+o	The number of hits (when the page was found in memory).
+o	The number of faults (when the page had to be loaded).
+o	The hit ratio (percentage of hits).
+o	The fault ratio (percentage of faults).
+
+________________________________________
+Conclusion:
+•	The program simulates how pages are handled in a computer's memory using two common page replacement algorithms: FIFO and Optimal.
+•	It helps to understand how memory is managed and how different algorithms affect the performance of the system in terms of page hits and faults.
+
