@@ -1,0 +1,357 @@
+This Java code is a program for CPU scheduling algorithms that simulates the **First-Come, First-Served (FCFS)** and **Round Robin** scheduling algorithms. Let’s go through the code step-by-step.
+
+### Code Breakdown
+
+#### Imports and Class Declaration
+```java
+import java.util.Arrays;
+import java.util.Scanner;
+public class CPU_Scheduling 
+{
+```
+- **`import java.util.Arrays;`**: Imports the `Arrays` class, which contains methods for array manipulation (e.g., calculating averages).
+- **`import java.util.Scanner;`**: Imports `Scanner` for user input.
+- **`public class CPU_Scheduling`**: Declares the main class `CPU_Scheduling`.
+
+#### FCFS Method (First-Come, First-Served Scheduling)
+```java
+    public static void fcfs(int[] processes, int[] burstTimes) 
+    {
+        int n = processes.length;
+        int[] waitingTimes = new int[n];
+        int[] turnaroundTimes = new int[n];
+```
+- **`public static void fcfs`**: Defines a static method `fcfs` for First-Come, First-Served scheduling.
+- **`int n = processes.length;`**: Gets the number of processes.
+- **`int[] waitingTimes = new int[n];`** and **`int[] turnaroundTimes = new int[n];`**: Initializes arrays to store waiting and turnaround times for each process.
+
+```java
+        for (int i = 1; i < n; i++) 
+        {
+            waitingTimes[i] = waitingTimes[i - 1] + burstTimes[i - 1];
+        }
+```
+- **Loop for calculating waiting times**: This loop iterates over each process starting from the second (index `1`). Each process's waiting time is calculated based on the sum of the burst times of all previous processes.
+
+```java
+        for (int i = 0; i < n; i++)
+        {
+            turnaroundTimes[i] = waitingTimes[i] + burstTimes[i];
+        }
+```
+- **Loop for calculating turnaround times**: Calculates each process’s turnaround time by adding its waiting time and burst time.
+
+```java
+        double avgWaitingTime = Arrays.stream(waitingTimes).average().orElse(0);
+        double avgTurnaroundTime = Arrays.stream(turnaroundTimes).average().orElse(0);
+```
+- **Calculating averages**: Uses `Arrays.stream` to calculate the average waiting and turnaround times. If no values are present, defaults to `0`.
+
+```java
+        System.out.println("FCFS Scheduling:");
+        System.out.println("Waiting Times: " + Arrays.toString(waitingTimes));
+        System.out.println("Turnaround Times: " + Arrays.toString(turnaroundTimes));
+        System.out.println("Average Waiting Time: " + avgWaitingTime);
+        System.out.println("Average Turnaround Time: " + avgTurnaroundTime);
+    }
+```
+- **Output Results**: Prints the waiting times, turnaround times, and their averages for FCFS scheduling.
+
+#### Round Robin Method
+```java
+    public static void roundRobin(int[] processes, int[] burstTimes, int quantum)
+    {
+        int n = processes.length;
+        int[] remainingTimes = Arrays.copyOf(burstTimes, n);
+        int[] waitingTimes = new int[n];
+        int[] turnaroundTimes = new int[n];
+        int time = 0;
+        int completed = 0;
+```
+- **Method definition**: Defines the `roundRobin` method with an additional `quantum` parameter.
+- **Arrays and counters**:
+  - **`remainingTimes`**: Copies `burstTimes` to track remaining burst time for each process.
+  - **`waitingTimes`** and **`turnaroundTimes`**: Arrays to store waiting and turnaround times.
+  - **`time`**: Keeps track of the total elapsed time.
+  - **`completed`**: Tracks the number of completed processes.
+
+```java
+        while (completed < n) {
+            for (int i = 0; i < n; i++)
+            {
+                if (remainingTimes[i] > 0) 
+                {
+                    if (remainingTimes[i] > quantum) 
+                    {
+                        time += quantum;
+                        remainingTimes[i] -= quantum;
+                    }
+                    else 
+                    {
+                        time += remainingTimes[i];
+                        waitingTimes[i] = time - burstTimes[i];
+                        remainingTimes[i] = 0;
+                        completed++;
+                    }
+                }
+            }
+        }
+```
+- **Loop for Round Robin Scheduling**:
+  - **Outer `while` loop**: Runs until all processes are completed.
+  - **Inner `for` loop**: Iterates over each process to distribute CPU time based on the quantum.
+  - **`remainingTimes[i] > 0`**: Checks if the process is still incomplete.
+  - **`if (remainingTimes[i] > quantum)`**: If the remaining time exceeds the quantum, reduces remaining time by the quantum and increments `time` by the quantum.
+  - **`else`**: If the remaining time is less than or equal to the quantum, adds it to `time`, updates waiting time for the process, marks it as complete, and increments `completed`.
+
+```java
+        for (int i = 0; i < n; i++) 
+        {
+            turnaroundTimes[i] = waitingTimes[i] + burstTimes[i];
+        }
+```
+- **Calculates Turnaround Times**: After the main loop, calculates the turnaround times for each process.
+
+```java
+        double avgWaitingTime = Arrays.stream(waitingTimes).average().orElse(0);
+        double avgTurnaroundTime = Arrays.stream(turnaroundTimes).average().orElse(0);
+        System.out.println("Round Robin Scheduling:");
+        System.out.println("Waiting Times: " + Arrays.toString(waitingTimes));
+        System.out.println("Turnaround Times: " + Arrays.toString(turnaroundTimes));
+        System.out.println("Average Waiting Time: " + avgWaitingTime);
+        System.out.println("Average Turnaround Time: " + avgTurnaroundTime);
+    }
+```
+- **Output Results**: Prints the waiting times, turnaround times, and their averages for Round Robin scheduling.
+
+#### Main Method
+```java
+    public static void main(String[] args)
+    {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of processes: ");
+        int n = scanner.nextInt();
+        int[] processes = new int[n];
+        int[] burstTimes = new int[n];
+        System.out.println("Enter the burst times for each process:");
+        for (int i = 0; i < n; i++) 
+        {
+            System.out.print("Process " + i + " burst time: ");
+            burstTimes[i] = scanner.nextInt();
+        }
+```
+- **User Input**: Gets the number of processes, initializes arrays, and prompts the user to enter burst times for each process.
+
+```java
+        while (true)
+        {
+            System.out.println("\nCPU Scheduling Algorithms:");
+            System.out.println("1. FCFS Scheduling");
+            System.out.println("2. Round Robin Scheduling");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+```
+- **Menu Loop**: Displays a menu allowing the user to select between FCFS, Round Robin, and Exit options.
+
+```java
+            switch (choice) 
+            {
+                case 1:
+                    fcfs(processes, burstTimes);
+                    break;
+                case 2:
+                    System.out.print("Enter the quantum time for Round Robin: ");
+                    int quantum = scanner.nextInt();
+                    roundRobin(processes, burstTimes, quantum);
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        }
+    }
+}
+```
+- **`switch` statement**: Based on the user's choice:
+  - **Case 1**: Calls `fcfs` to simulate FCFS scheduling.
+  - **Case 2**: Prompts for quantum time, then calls `roundRobin`.
+  - **Case 3**: Exits the program.
+  - **Default**: Displays an error for invalid input.
+
+This completes the program, which simulates FCFS and Round Robin scheduling based on user input and displays the respective results.
+
+
+
+Here are some common questions that might be asked about this code during a viva, along with easy-to-understand answers:
+
+### 1. **What is FCFS (First-Come, First-Served) Scheduling?**
+   - **Answer:** FCFS (First-Come, First-Served) is a scheduling algorithm where processes are handled in the order they arrive. The first process to request the CPU gets it first, and others wait their turn. This method is simple but can lead to high waiting times if a long process arrives first.
+
+### 2. **How does FCFS calculate waiting and turnaround times?**
+   - **Answer:** In FCFS, the waiting time for each process is calculated as the sum of the burst times of all previous processes. Turnaround time is the waiting time plus the burst time of that process. The program calculates these using two `for` loops in the `fcfs` method.
+
+### 3. **What is Round Robin Scheduling?**
+   - **Answer:** Round Robin Scheduling assigns each process a fixed time slice or "quantum" in a cyclic order. Each process gets CPU time for a quantum, and if it doesn’t complete within that time, it goes to the end of the queue. This approach helps in fair distribution of CPU time and is especially useful in time-sharing systems.
+
+### 4. **How does this program implement Round Robin?**
+   - **Answer:** The program uses an `while` loop to go through each process, assigning it a quantum of time (from `remainingTimes`). If a process completes within the quantum, it moves to the next one; otherwise, it subtracts the quantum from its remaining time and moves it to the end of the cycle. This continues until all processes are completed.
+
+### 5. **What are "waiting time" and "turnaround time"?**
+   - **Answer:**
+     - **Waiting time:** The total time a process waits in the queue before getting CPU time.
+     - **Turnaround time:** The total time taken from when a process enters the queue until it completes execution.
+
+### 6. **Why do we need the `remainingTimes` array in Round Robin?**
+   - **Answer:** The `remainingTimes` array keeps track of how much burst time each process has left. Since Round Robin gives each process only a fixed amount of time (quantum), it may need multiple rounds to complete. `remainingTimes` helps track how much CPU time each process still needs.
+
+### 7. **What does the `quantum` mean in Round Robin Scheduling?**
+   - **Answer:** The `quantum` is the fixed time slice that each process is allowed to use the CPU before the next process gets a turn. If the process doesn’t finish in this time, it goes back in the queue for another turn.
+
+### 8. **How does the program calculate average waiting and turnaround times?**
+   - **Answer:** The program uses `Arrays.stream(...).average()` to calculate the average of the waiting and turnaround times stored in arrays for each scheduling algorithm.
+
+### 9. **What would happen if the quantum in Round Robin is too small or too large?**
+   - **Answer:** If the quantum is too small, the CPU will frequently switch between processes, causing high overhead. If it’s too large, Round Robin will act more like FCFS, as each process will have enough time to complete before switching. Ideally, the quantum should be balanced to minimize switching while still allowing fair CPU sharing.
+
+### 10. **Why is FCFS scheduling not suitable for interactive systems?**
+   - **Answer:** FCFS can result in high waiting times if a long process arrives first, causing all other processes to wait (known as the **convoy effect**). This can be problematic for interactive systems where fast response times are needed, as some processes might wait too long.
+
+### 11. **How does the program handle invalid menu choices?**
+   - **Answer:** The program uses a `default` case in the `switch` statement to print an error message and prompt the user to enter a valid option.
+
+### 12. **What would happen if you didn’t use a loop to repeat the menu?**
+   - **Answer:** Without a loop, the menu would be displayed only once, and the program would run the chosen algorithm a single time. The program would then end, requiring the user to restart it if they wanted to run another algorithm.
+
+### 13. **Why are `waitingTimes` and `turnaroundTimes` arrays needed in both FCFS and Round Robin?**
+   - **Answer:** Both arrays store the waiting and turnaround times for each process, allowing us to calculate averages and print individual process times. This data is crucial for analyzing and comparing the performance of each scheduling algorithm.
+
+Manual 
+Here are brief and easy-to-understand answers to each question:
+
+### 1. Define process and explain the need for process scheduling.
+- **Process**: A process is a running instance of a program, including its code, data, and resources like memory and CPU time. Processes need to be managed so they run efficiently and do not interfere with each other.
+- **Need for Process Scheduling**: Process scheduling is needed to manage CPU time among multiple processes. It ensures each process gets fair CPU access, maximizes CPU utilization, reduces waiting time, and improves system responsiveness.
+
+### 2. Explain different scheduling criteria and policies for scheduling processes.
+- **Scheduling Criteria**:
+  - **CPU Utilization**: Keep the CPU as busy as possible.
+  - **Throughput**: Number of processes completed in a given time.
+  - **Turnaround Time**: Time taken from process submission to completion.
+  - **Waiting Time**: Time a process spends waiting in the queue.
+  - **Response Time**: Time from submission until the process’s first response.
+
+- **Scheduling Policies**:
+  - **FCFS (First-Come, First-Served)**: Processes are scheduled in the order they arrive.
+  - **SJF (Shortest Job First)**: Chooses the process with the smallest burst time; can be preemptive or non-preemptive.
+  - **Priority Scheduling**: Assigns CPU based on priority, either preemptive or non-preemptive.
+  - **Round Robin**: Each process gets a fixed time (quantum) in a cyclic order.
+
+### 3. Explain possible process states.
+- **New**: Process is being created.
+- **Ready**: Process is ready to execute but waiting for CPU time.
+- **Running**: Process is currently being executed by the CPU.
+- **Waiting**: Process is waiting for some resource or event to occur.
+- **Terminated**: Process has completed execution.
+
+### 4. Explain FCFS, SJF (Preemptive), Priority (Non-Preemptive), and Round Robin (Preemptive), and how to determine waiting time, turnaround time, and throughput.
+
+- **FCFS (First-Come, First-Served)**:
+  - Processes are executed in the order they arrive.
+  - **Waiting Time**: Calculated by summing burst times of previous processes.
+  - **Turnaround Time**: Waiting time + burst time.
+  - **Throughput**: Number of processes completed in a given time.
+
+- **SJF (Shortest Job First, Preemptive)**:
+  - Chooses the process with the smallest remaining burst time.
+  - **Waiting Time**: Calculated based on interruptions; smaller jobs get priority.
+  - **Turnaround Time**: Waiting time + burst time.
+  - **Throughput**: Higher throughput as shorter jobs finish faster.
+
+- **Priority Scheduling (Non-Preemptive)**:
+  - Process with the highest priority runs first.
+  - **Waiting Time**: Depends on arrival and priority order.
+  - **Turnaround Time**: Waiting time + burst time.
+  - **Throughput**: Varies with process priorities and arrival times.
+
+- **Round Robin (Preemptive)**:
+  - Each process gets a fixed time quantum; if not finished, it moves to the end of the queue.
+  - **Waiting Time**: Based on quantum intervals and number of processes.
+  - **Turnaround Time**: Total time from entry until completion.
+  - **Throughput**: Fair for all processes; depends on quantum size.
+
+Here are clear and concise answers for each question:
+
+### 1. What are the types of CPU schedulers?
+   - **Long-Term Scheduler**: Decides which processes are loaded from secondary storage into main memory for execution.
+   - **Short-Term Scheduler**: Determines which ready process will get the CPU next; runs most frequently.
+   - **Medium-Term Scheduler**: Handles swapping processes in and out of main memory to control the degree of multiprogramming.
+
+### 2. What is the difference between long-term and short-term scheduling?
+   - **Long-Term Scheduling**: Controls which processes enter the system to balance load and resources.
+   - **Short-Term Scheduling**: Selects which process in memory gets CPU time next, occurring very frequently.
+
+### 3. Logic of the program?
+   - The program simulates different CPU scheduling algorithms (like FCFS, Round Robin) to calculate waiting times, turnaround times, and average performance metrics based on process burst times and order.
+
+### 4. What is preemptive and non-preemptive scheduling?
+   - **Preemptive Scheduling**: Allows the CPU to be taken from a running process if a higher-priority process arrives or a quantum expires.
+   - **Non-Preemptive Scheduling**: Once a process starts, it runs to completion without interruption.
+
+### 5. What are types of scheduling algorithms?
+   - **FCFS (First-Come, First-Served)**, **SJF (Shortest Job First)**, **Priority Scheduling**, and **Round Robin** are common scheduling algorithms.
+
+### 6. Why may Priority Scheduling cause low-priority processes to starve?
+   - **Answer**: If high-priority processes keep arriving, low-priority processes may be delayed indefinitely, leading to "starvation," where some processes never get CPU time.
+
+### 7. What are the goals of scheduling?
+   - **Answer**: To maximize CPU utilization, ensure fairness among processes, minimize waiting and turnaround time, and improve response time for users.
+
+### 8. Define the difference between preemptive and non-preemptive scheduling.
+   - **Preemptive Scheduling**: The CPU can be reallocated mid-process, usually to accommodate higher-priority tasks.
+   - **Non-Preemptive Scheduling**: Once a process begins, it runs until it’s done, even if other tasks are waiting.
+
+### 9. Which scheduling algorithm is best? Why?
+   - **Answer**: **Round Robin** is often preferred in time-sharing systems for fairness, as it gives each process a turn with a fixed time slice. **SJF** is best for minimal waiting time but can lead to starvation of longer processes. Each algorithm has advantages depending on the system's needs.
+
+
+
+LOGIC CODE
+
+### General Explanation of the Program
+The program is designed to simulate **CPU scheduling**—a method that decides which process (or task) should use the CPU at a given time. It lets users choose between different scheduling methods (FCFS and Round Robin), and then calculates how long each process will wait, how long it takes to complete, and averages for all processes.
+
+### Step-by-Step Logic
+1. **Input**: 
+   - The program first asks the user how many processes they want to run.
+   - Then, it takes the burst time (execution time) for each process—this is the time each process needs to complete.
+
+2. **Menu for Scheduling Algorithms**:
+   - The program displays a menu for the user to select a scheduling algorithm:
+     - **FCFS (First-Come, First-Served)**: Processes are handled in the order they arrive.
+     - **Round Robin**: Processes are given a fixed time (quantum) to run, one after another in a cycle.
+
+3. **FCFS Scheduling**:
+   - In FCFS, each process waits for the previous one to finish. The program calculates the waiting and turnaround times based on the arrival order.
+   - It then prints each process's waiting and turnaround times and averages them.
+Then, it calculates the total time for each task (waiting time + its burst time) to see when each will finish.
+
+
+4. **Round Robin Scheduling**:
+   - In Round Robin, each process is given a short, fixed time called a quantum. If a process doesn’t finish in this time, it goes to the end of the queue, and the next one starts.
+   - This continues until all processes are finished.
+   - The program calculates each process's waiting and turnaround times based on the time quantum and prints them, along with averages.
+
+5. **Output**:
+   - After calculating, the program shows:
+     - The waiting time and turnaround time for each process.
+     - The average waiting and turnaround times for all processes.
+
+### Key Concepts Used:
+- **Waiting Time**: Time each process spends waiting in the queue.
+- **Turnaround Time**: Total time from when the process arrives until it completes.
+- **Average Times**: Overall average for both waiting and turnaround times to evaluate efficiency.
+
+This is the general logic: taking user input, running the chosen scheduling algorithm, and printing detailed results. Each algorithm manages CPU time differently to demonstrate various scheduling strategies.
